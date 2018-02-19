@@ -33,4 +33,14 @@ urlpatterns = patterns(
     url(r'show_image/(?P<image_id>[0-9]+)/$',
         views.show_image, name='webgallery_show_image'),
 
+    # ROI table view
+    url(r'show_roi_table/(?P<image_id>[0-9]+)/$',
+        views.show_roi_table,
+        name='webgallery_show_roi_table'),
+
+    # ROI table view
+    url(r'show_roi_in_preview/(?P<roi_id>[0-9]+)/$',
+        views.show_roi_in_preview,
+        name='webgallery_show_roi_in_preview'),
+
 )

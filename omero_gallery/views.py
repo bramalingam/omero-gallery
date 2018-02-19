@@ -200,6 +200,117 @@ def show_dataset(request, dataset_id, conn=None, **kwargs):
 
     return context
 
+@login_required()
+@render_response()
+def show_roi_table(request, image_id, conn=None, **kwargs):
+    """
+    Show a roi_table
+    """
+
+    sc = conn.getObject('Image', image_id)
+    for ann in sc.listAnnotations():
+        if isinstance(ann, omero.gateway.FileAnnotationWrapper):
+            if (ann.getFile().getName() == 'Test_Table'):
+                ofId = ann.getFile().getId()
+                #Check size of file here and handle pagination(if need be)
+                break
+    original_file = omero.model.OriginalFileI(ofId, False)
+    openTable = conn.c.sf.sharedResources().openTable(original_file)
+    rowCount = openTable.getNumberOfRows()
+    
+    table_column_names = [col.name for col in openTable.getHeaders()]
+    print table_column_names
+    black_list = []
+    column_indices = []
+    for column_name in table_column_names:
+        if column_name in black_list:
+            continue
+        column_indices.append(table_column_names.index(column_name))
+    
+    data = openTable.slice(None, None)
+
+    roi_table_data = {}
+    for index in range(rowCount):
+        row_values = [column.values[index] for column in data.columns]
+        roi_table_data[index] = row_values
+        if index==0:
+            print row_values
+
+    shapes = []
+    roi_service = conn.getRoiService()
+    result = roi_service.findByImage(long(image_id), None)
+    cntr = 0
+    for roi in result.rois:
+        # print "ROI:  ID:", roi.getId().getValue()
+        for s in roi.copyShapes():
+            shape = {}
+            shape['roi_id'] = roi.id.val
+            shape['id'] = s.getId().getValue()
+            theT = -1
+            theC = -1
+            theZ = -1
+            if s.getTheT() is not None:
+                theT = s.getTheT().getValue()
+            if s.getTheC() is not None:
+                theC = s.getTheC().getValue()
+            if s.getTheZ() is not None:
+                theZ = s.getTheZ().getValue()
+            shape['theT'] = theT
+            shape['theZ'] = theZ
+            shape['theC'] = theC
+            shape['data'] = roi_table_data[cntr]
+            cntr = cntr + 1
+            if s.getTextValue():
+                shape['textValue'] = s.getTextValue().getValue()
+
+            shapes.append(shape)
+
+    context = {'template': "webgallery/show_roi_table.html"}
+    context['shapes'] = shapes
+    context['table_col_names'] = table_column_names
+
+    return context
+
+@login_required()
+@render_response()
+def show_roi_in_preview(request, roi_id, conn=None, **kwargs):
+
+    shapes = []
+    roi_service = conn.getRoiService()
+    result = roi_service.findByRoi(long(roi_id), None)
+    roi = result.rois[0]
+    image = conn.getObject('image', roi.image.id.val)
+    if roi is None:
+        raise Http404
+    points = ''
+    for s in roi.copyShapes():
+        print(s.getPoints().val)
+        points = s.getPoints().val.replace(' ','L')
+        points = 'M' + points
+        theT = 0
+        theC = 0
+        theZ = 0
+        if s.getTheT() is not None:
+            theT = s.getTheT().getValue()
+        if s.getTheC() is not None:
+            theC = s.getTheC().getValue()
+        if s.getTheZ() is not None:
+            theZ = s.getTheZ().getValue()
+        shape = {}
+        shape['theT'] = theT
+        shape['theZ'] = theZ
+        shape['theC'] = theC
+
+    context = {'template': "webgallery/show_roi_in_preview.html"}
+    context['points'] = points
+    context['image_id'] = image.id
+    context['image_width'] = image.getSizeX()
+    context['image_height'] = image.getSizeY()
+    context['shape'] = shape
+
+    return context
+
+
 
 @login_required()
 @render_response()

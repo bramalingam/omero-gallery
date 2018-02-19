@@ -1,0 +1,21 @@
+
+<script>
+    $(function() {
+
+        // Initialise the center panel plugin, on our specified element
+        $("#results_roi_table").omeroweb_center_plugin({
+
+            // To support single item selection, we can specify the types like this.
+            // Tab will only be enabled when a single dataset is selected
+            supported_obj_types: ['image'],
+
+            load_plugin_content: function(selected, dtype, oid){
+
+                // since we currently limit our dtype to 'dataset', oid will be dataset ID
+                // Use the 'index' of your app as base for your URL
+                var roi_table_url = '{% url 'webgallery_index' %}' + 'show_roi_table/' + oid + '/';
+                $(this).load(roi_table_url);
+            }
+        });
+    });
+</script>

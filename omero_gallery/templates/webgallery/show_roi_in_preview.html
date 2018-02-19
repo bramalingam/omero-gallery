@@ -1,0 +1,14 @@
+<script type="text/javascript" src="{% static "3rdparty/raphael-2.1.0/raphael-min.js" %}"></script>
+<script type="text/javascript" src="{% static "3rdparty/raphael-2.1.0/scale.raphael.js" %}"></script>
+<div id="roi_in_preview" style='width:{{image_width}}px; height:{{image_height}}px; border:solid black 1px'>
+	<img src="{% url 'webgateway.views.render_image' image_id shape.theZ shape.theT %}" style="position:absolute" />
+	<div id="roi_canvas" style='width:{{image_width}}px; height:{{image_height}}px; position:absolute'></div>
+</div>
+
+<script>
+	var orig_width = 300
+	var orig_height = 300
+	var paper = new Raphael("roi_canvas", orig_width, orig_height);
+	paper.path("{{points}}").attr({stroke: "red"})
+</script>
+

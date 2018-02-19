@@ -1,0 +1,18 @@
+<script>
+    $(function() {
+
+        // Initialise the center panel plugin, on our specified element
+        $("#roi_in_preview").omeroweb_right_plugin({
+
+            // To support single item selection, we can specify the types like this.
+            // Tab will only be enabled when a single dataset is selected
+            supported_obj_types: ['image'],
+
+            load_plugin_content: function(selected, dtype, oid){
+                
+                // var roi_preview_url = '{% url 'webgallery_index' %}show_roi_in_preview/' + oid + '/';
+                // $(this).load(roi_preview_url);
+            }
+        });
+    });
+</script>
