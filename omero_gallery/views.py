@@ -3,6 +3,8 @@ from django.http import Http404
 import omero
 from omero.rtypes import wrap
 from omeroweb.webclient.decorators import login_required, render_response
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 @login_required()
@@ -230,9 +232,11 @@ def show_roi_table(request, image_id, conn=None, **kwargs):
     data = openTable.slice(None, None)
 
     roi_table_data = {}
+    row_data = []
     for index in range(rowCount):
         row_values = [column.values[index] for column in data.columns]
         roi_table_data[index] = row_values
+        row_data.append(row_values)
         if index==0:
             print row_values
 
@@ -268,6 +272,7 @@ def show_roi_table(request, image_id, conn=None, **kwargs):
     context = {'template': "webgallery/show_roi_table.html"}
     context['shapes'] = shapes
     context['table_col_names'] = table_column_names
+    context['roi_table_data'] = json.dumps(row_data, cls=DjangoJSONEncoder)
 
     return context
 
