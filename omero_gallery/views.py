@@ -233,44 +233,16 @@ def show_roi_table(request, image_id, conn=None, **kwargs):
 
     roi_table_data = {}
     row_data = []
+    row_data_raw = []
     for index in range(rowCount):
-        row_values = [column.values[index] for column in data.columns]
+        row_values = [column.values[index] for idx,column in enumerate(data.columns)]
         roi_table_data[index] = row_values
+        row_data_raw.append(row_values)
+        row_values = [0 if idx == 5 else column.values[index] for idx,column in enumerate(data.columns)]
         row_data.append(row_values)
-        if index==0:
-            print row_values
-
-    shapes = []
-    roi_service = conn.getRoiService()
-    result = roi_service.findByImage(long(image_id), None)
-    cntr = 0
-    for roi in result.rois:
-        # print "ROI:  ID:", roi.getId().getValue()
-        for s in roi.copyShapes():
-            shape = {}
-            shape['roi_id'] = roi.id.val
-            shape['id'] = s.getId().getValue()
-            theT = -1
-            theC = -1
-            theZ = -1
-            if s.getTheT() is not None:
-                theT = s.getTheT().getValue()
-            if s.getTheC() is not None:
-                theC = s.getTheC().getValue()
-            if s.getTheZ() is not None:
-                theZ = s.getTheZ().getValue()
-            shape['theT'] = theT
-            shape['theZ'] = theZ
-            shape['theC'] = theC
-            shape['data'] = roi_table_data[cntr]
-            cntr = cntr + 1
-            if s.getTextValue():
-                shape['textValue'] = s.getTextValue().getValue()
-
-            shapes.append(shape)
 
     context = {'template': "webgallery/show_roi_table.html"}
-    context['shapes'] = shapes
+    context['shapes'] = row_data_raw
     context['table_col_names'] = table_column_names
     context['roi_table_data'] = json.dumps(row_data, cls=DjangoJSONEncoder)
 

@@ -1,11 +1,12 @@
 <script type="text/javascript" src="{% static "3rdparty/raphael-2.1.0/raphael-min.js" %}"></script>
 <script type="text/javascript" src="{% static "3rdparty/raphael-2.1.0/scale.raphael.js" %}"></script>
-<script src="https://cdn.plot.ly/plotly-1.2.0.min.js"></script>
+
 <div id="roi_in_preview" style='width:{{image_width}}px; height:{{image_height}}px; border:solid black 1px'>
 	<img src="{% url 'webgateway.views.render_image' image_id shape.theZ shape.theT %}" style="position:absolute" />
 	<div id="roi_canvas" style='width:{{image_width}}px; height:{{image_height}}px; position:absolute'></div> 
 </div>
-<div id="column_plot" style="width: 200px; height: 200px;">
+<div id="column_plot" style="width: {{image_width}}px; height: {{image_width}}px;">
+<canvas id="myChart" width="{{image_width}}" height="{{image_width}}"></canvas>
 
 <script>
 	var orig_width = 300
@@ -15,12 +16,18 @@
 
 	// var value = getColumn("roi_results_table", 2);
 	// var rowCount = document.getElementById('myTableID').rows.length;
-	var area = tableData.map(function(row) {return row[0]});
-	var mean = tableData.map(function(row) {return row[1]});
+	var area = tableData.map(function(row) {return row[7]});
+	var mean = tableData.map(function(row) {return row[8]});
 	var sizemat = [];
+	var colormat = [];
+	var bkgcolor = [];
+	var brdrcolor = [];
 	var cntr = 0;
 	for (var cntr=0; cntr< area.length; cntr++) {
 		sizemat.push(cntr == table_row_id ? 20 : 10)
+		colormat.push(cntr == table_row_id ? "Green" : "Yellow")
+		bkgcolor.push(cntr == table_row_id ? "rgba(255, 99, 132, 0.2)" : "rgba(75, 192, 192, 0.2)")
+		brdrcolor.push("Black")
 	}
 
 	var trace1 = {
@@ -35,12 +42,23 @@
 	var data = [trace1];
 
 	var layout = {
-	  title: 'Marker Size',
+	  title: 'Scatter Plot',
 	  showlegend: false,
-	  height: 600,
-	  width: 600
+	  height: 350,
+	  width: 350,
+	  autosize: true,
 	};
 
-	Plotly.newPlot('column_plot', data, layout);
+	var margin = {
+		l: 60,
+		r: 20,
+		t: 40,
+		// b: 60,
+		pad: 0,
+		autoexpand: true,
+	}
+
+	Plotly.newPlot('column_plot', data, layout, margin);
+
 </script>
 

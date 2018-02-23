@@ -14,7 +14,9 @@
                 // since we currently limit our dtype to 'dataset', oid will be dataset ID
                 // Use the 'index' of your app as base for your URL
                 var roi_table_url = '{% url 'webgallery_index' %}' + 'show_roi_table/' + oid + '/';
+                $(this).html('<p class="loading_center">Loading... please wait. <img src ="{% static "webgateway/img/spinner.gif" %}"/></p>')
                 $(this).load(roi_table_url);
+
             }
         });
     });
